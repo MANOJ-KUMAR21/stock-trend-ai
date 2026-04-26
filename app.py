@@ -2,52 +2,55 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-# 1. Page Configuration
-st.set_page_config(page_title="Stock AI Analysis", page_icon="📈")
+# 1. Page Config & Header
+st.set_page_config(page_title="Stock Trend AI", layout="centered")
 
-# 2. Header Section
-st.title("Stock Trend AI Analysis")
-st.write("### (Results within 3 seconds)")
+# Matching the AD's text style
+st.markdown("<h1 style='text-align: center; color: #0077b6;'>Stock AI Analysis</h1>", unsafe_all_html=True)
+st.markdown("<p style='text-align: center; font-size: 20px;'><b>AI analysis trend (free)</b><br><span style='color: gray;'>Results within 3 seconds</span></p>", unsafe_all_html=True)
 
-# 3. Search Input
-symbol = st.text_input("Enter stock symbol (e.g., IRFC.NS or RELIANCE.NS)", value="IRFC.NS")
-check_btn = st.button("Check Trend Now")
+# 2. Search Logic (The .NS Fix)
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    user_input = st.text_input("", placeholder="Enter stock name or symbol (e.g. IRFC)", key="search_bar")
+    check_btn = st.button("Check now", use_container_width=True)
 
-# 4. Logic & Analysis
-if check_btn:
-    with st.spinner('Fetching real-time data...'):
+if check_btn and user_input:
+    # Logic: If it's just a symbol like 'IRFC', add '.NS' for Indian Markets automatically
+    symbol = user_input.upper().strip()
+    if "." not in symbol:
+        formatted_symbol = f"{symbol}.NS"
+    else:
+        formatted_symbol = symbol
+
+    with st.spinner('Analyzing...'):
         try:
-            # Fetch data (Last 6 months)
-            data = yf.download(symbol, period="6mo", interval="1d")
+            data = yf.download(formatted_symbol, period="6mo", interval="1d")
             
             if not data.empty:
-                # Fix for the "Series" error: Ensure we are looking at the 'Close' column only
                 close_prices = data['Close'].squeeze()
-                
-                # Basic AI Logic: 20-day Simple Moving Average
                 sma_20 = close_prices.rolling(window=20).mean()
-                
-                # Get latest values
                 current_price = float(close_prices.iloc[-1])
                 latest_sma = float(sma_20.iloc[-1])
-                
-                st.metric(label=f"Current Price of {symbol}", value=f"₹{current_price:.2f}")
-                
-                # Trend Prediction Logic
+
+                # The "Card" Look
+                st.markdown(f"""
+                <div style="background-color: white; padding: 20px; border-radius: 10px; border: 1px solid #ddd; text-align: center; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);">
+                    <h2 style="margin: 0; color: #333;">{symbol}</h2>
+                    <h1 style="margin: 10px 0; color: #0077b6;">₹{current_price:.2f}</h1>
+                </div>
+                """, unsafe_all_html=True)
+
+                # Trend Result
                 if current_price > latest_sma:
-                    st.success("🚀 BULLISH TREND: Stock is currently strong.")
+                    st.success(f"🚀 BULLISH TREND: {symbol} is showing strong upward momentum.")
                 else:
-                    st.warning("📉 BEARISH TREND: Stock is currently weak.")
-                
-                # Visualizing the trend
-                st.subheader("Price vs 20-Day Average")
-                chart_data = pd.DataFrame({
-                    'Price': close_prices,
-                    'SMA20': sma_20
-                })
+                    st.warning(f"📉 BEARISH TREND: {symbol} is currently trading below its average.")
+
+                # Professional Chart
+                chart_data = pd.DataFrame({'Price': close_prices, '20-Day Avg': sma_20})
                 st.line_chart(chart_data)
-                
             else:
-                st.error("No data found. Please check the symbol (use .NS for NSE).")
+                st.error("Could not find that stock. Try the exact symbol (e.g., RELIANCE).")
         except Exception as e:
-            st.error(f"Analysis Error: {e}")
+            st.error("Please enter a valid stock symbol.")
