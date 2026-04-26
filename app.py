@@ -2,52 +2,46 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 
-# 1. UI Styling - Updated for compatibility
-st.set_page_config(page_title="IRFC Stock AI", page_icon="📈")
-
-# Cleaned up CSS block
-custom_css = """
-    <style>
-    .stApp { background-color: #f9f4eb; }
-    .stButton>button { width: 100%; background-color: #0077b6; color: white; border-radius: 5px; }
-    </style>
-    """
-st.markdown(custom_css, unsafe_all_html=True)
+# 1. Page Configuration
+st.set_page_config(page_title="Stock AI Analysis", page_icon="📈")
 
 # 2. Header Section
-st.title("IRFC (543257)")
-st.subheader("AI analysis trend (free)")
-st.caption("Results within 3 seconds")
+st.title("Stock Trend AI Analysis")
+st.write("### (Results within 3 seconds)")
 
 # 3. Search Input
-# Using a unique key helps prevent "DuplicateWidgetID" errors
-symbol = st.text_input("Enter stock symbol (e.g. IRFC.NS)", placeholder="IRFC.NS", key="stock_input")
-check_btn = st.button("Check now")
+# Using a clean layout without custom CSS to avoid the TypeError
+symbol = st.text_input("Enter stock symbol (e.g., IRFC.NS or RELIANCE.NS)", value="IRFC.NS")
+check_btn = st.button("Check Trend Now")
 
 # 4. Logic & Analysis
-if check_btn and symbol:
-    with st.spinner('Analyzing trend...'):
+if check_btn:
+    with st.spinner('Fetching real-time data...'):
         try:
-            # Fetch data
+            # Fetch data (Last 6 months)
             data = yf.download(symbol, period="6mo", interval="1d")
             
             if not data.empty:
-                # Basic AI Logic: Simple Moving Average (SMA)
+                # Basic AI Logic: 20-day Simple Moving Average
                 data['SMA20'] = data['Close'].rolling(window=20).mean()
+                
+                # Get latest values and convert to standard Python floats
                 current_price = float(data['Close'].iloc[-1])
                 sma_20 = float(data['SMA20'].iloc[-1])
                 
-                st.write(f"### Current Price: ₹{current_price:.2f}")
+                st.metric(label=f"Current Price of {symbol}", value=f"₹{current_price:.2f}")
                 
-                # Trend Prediction
+                # Trend Prediction Logic
                 if current_price > sma_20:
-                    st.success("🚀 BULLISH TREND: Stock is trading above 20-day average.")
+                    st.success("🚀 BULLISH TREND: Stock is currently strong.")
                 else:
-                    st.warning("📉 BEARISH TREND: Stock is below 20-day average.")
+                    st.warning("📉 BEARISH TREND: Stock is currently weak.")
                 
-                # Show Chart
+                # Visualizing the trend
+                st.subheader("Price vs 20-Day Average")
                 st.line_chart(data[['Close', 'SMA20']])
+                
             else:
-                st.error("Stock symbol not found. For Indian stocks, add .NS (e.g., IRFC.NS)")
+                st.error("No data found. Please check the symbol (use .NS for NSE).")
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"Analysis Error: {e}")
