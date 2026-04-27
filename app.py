@@ -71,7 +71,7 @@ def get_data(symbol):
     return yf.download(symbol, period="6mo", interval="1d", progress=False)
 
 # --- 4. UI ---
-st.markdown('<h1 class="main-title">INDIAN STOCK'S TREND PREDICTION</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">INDIAN STOCKS TREND PREDICTION</h1>', unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #ffd700;'>Stock's Trend Predictor</p>", unsafe_allow_html=True)
 
 selected_symbol = st_searchbox(
