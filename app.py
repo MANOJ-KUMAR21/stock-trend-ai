@@ -4,7 +4,7 @@ import pandas as pd
 from streamlit_searchbox import st_searchbox
 
 # --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Indian Stock AI", layout="centered")
+st.set_page_config(page_title="Quant Hill Stock Trend Analysis", layout="centered")
 
 # --- 2. CSS (Background, Premium Button & Text Visibility) ---
 IMAGE_URL = "https://raw.githubusercontent.com/MANOJ-KUMAR21/stock-trend-ai/main/my_photo.jpg"
@@ -112,7 +112,7 @@ def get_ai_recommendation(symbol):
     except: return "LIMIT REACHED", "#808080"
 
 # --- 4. UI ---
-st.markdown("<h1 class='main-title'>INDIAN STOCK'S TREND PREDICTION</h1>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>QUANT HILL STOCK'S TREND PREDICTION</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #ffd700; font-weight: bold;'>AI Technical & Fundamental Analysis</p>", unsafe_allow_html=True)
 
 selected_symbol = st_searchbox(get_suggestions, key="stock_search", placeholder="Enter stock (e.g. Reliance, TCS...)")
