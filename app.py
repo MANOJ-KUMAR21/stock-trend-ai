@@ -125,6 +125,15 @@ if check_btn and selected_symbol:
             st.metric(label=f"Current Price ({selected_symbol})", value=f"₹{current_price:,.2f}")
             
             st.write("### 6-Month Trend Analysis")
-            st.line_chart(close_prices)
+            
+            # 1. Flatten the data and reset index to get 'Date' as a column
+            chart_df = data[['Close']].copy()
+            chart_df.columns = ['Market Price'] # Rename for clarity
+            
+            # 2. Add the 20-Day SMA Line for the 'Trend'
+            chart_df['20D Trend Line'] = chart_df['Market Price'].rolling(window=20).mean()
+            
+            # 3. Explicitly plot both columns
+            st.line_chart(chart_df)
         else:
             st.error("No data found for this stock.")
