@@ -6,17 +6,18 @@ from streamlit_searchbox import st_searchbox
 # --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Indian Stock AI", layout="centered")
 
-# --- 2. CSS (Modified to add your photo background) ---
-# Replace YOUR_IMAGE_DIRECT_LINK_HERE with your link, ensuring it stays inside the double quotes.
-# Example: url("https://i.imgur.com/yourPhoto.jpg")
+# --- 2. CSS (Using GitHub Raw Link) ---
+# PASTE YOUR RAW LINK BELOW
+IMAGE_URL = "https://github.com/MANOJ-KUMAR21/stock-trend-ai/blob/main/my_photo.jpg"
+
 st.markdown(f"""
     <style>
     .stApp {{
-        background-image: url("YOUR_IMAGE_DIRECT_LINK_HERE");
+        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                    url("{https://github.com/MANOJ-KUMAR21/stock-trend-ai/blob/main/my_photo.jpg}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        color: white;
     }}
     
     /* Center and Style Headers */
@@ -28,21 +29,12 @@ st.markdown(f"""
         text-shadow: 0px 0px 15px rgba(0, 212, 255, 0.6);
     }}
     
-    .sub-title {{
-        font-size: 20px;
-        text-align: center;
-        color: #ffd700; 
-        font-weight: bold;
-    }}
-
-    /* Essential fixes for text visibility against a photo background */
-    
-    /* 1. Make all standard text white */
+    /* Styling for visibility on top of photo */
     .stApp p, .stApp label, .stApp div {{
         color: white !important;
     }}
-    
-    /* 2. Fix the searchbox dropdown text color (must be black/dark) */
+
+    /* Keeps the searchbox dropdown readable (black text on white background) */
     div[data-baseweb="select"] ul {{
         background-color: white !important;
     }}
@@ -50,22 +42,18 @@ st.markdown(f"""
         color: black !important;
     }}
     
-    /* 3. Style standard input boxes */
-    div[data-baseweb="input"] input {{
-        color: black !important;
-        background-color: rgba(255, 255, 255, 0.9) !important;
-    }}
-
-    /* 4. Style Metrics and boxes with a semi-transparent dark overlay */
-    [data-testid="stMetric"], .stAlert {{
-        background-color: rgba(0, 0, 0, 0.7) !important;
+    /* Metric boxes with glassmorphism effect */
+    [data-testid="stMetric"] {{
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: blur(10px);
         padding: 20px;
         border-radius: 15px;
-        border: 1px solid rgba(0, 212, 255, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }}
     </style>
     """, unsafe_allow_html=True)
-# --- 3. FUNCTIONS ---
+    
+    # --- 3. FUNCTIONS ---
 @st.cache_data(ttl="1d")
 def get_suggestions(search_term: str):
     if not search_term or len(search_term) < 2:
