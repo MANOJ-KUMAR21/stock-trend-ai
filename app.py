@@ -55,36 +55,48 @@ def get_data(symbol):
 
 @st.cache_data(ttl="3600s")
 def get_ai_recommendation(symbol):
-    ticker = yf.Ticker(symbol)
-    info = ticker.info
-    hist = ticker.history(period="1mo")
-    
-    if hist.empty: return "NEUTRAL", "#808080"
+    try:
+        ticker = yf.Ticker(symbol)
+        
+        # 1. TECHNICALS (Historical data is generally safer from rate limits)
+        hist = ticker.history(period="1mo")
+        if hist.empty: return "NEUTRAL", "#808080"
 
-    # TECHNICALS: RSI calculation
-    delta = hist['Close'].diff()
-    gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
-    loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-    rs = gain / loss
-    rsi = 100 - (100 / (1 + rs)).iloc[-1]
+        delta = hist['Close'].diff()
+        gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
+        loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
+        rs = gain / loss
+        rsi = 100 - (100 / (1 + rs)).iloc[-1]
 
-    # FUNDAMENTALS: Price vs Target & PE Ratio
-    current_price = hist['Close'].iloc[-1]
-    target_price = info.get('targetMeanPrice', current_price)
-    pe_ratio = info.get('trailingPE', 25) # Assume average if missing
-    
-    score = 0
-    if rsi < 35: score += 2  # Oversold (Buy)
-    elif rsi > 65: score -= 2 # Overbought (Sell)
-    
-    if target_price > (current_price * 1.15): score += 2 # 15%+ Upside
-    if pe_ratio < 15: score += 1 # "Cheap" Valuation
+        # 2. FUNDAMENTALS (The high-risk part for rate limits)
+        score = 0
+        try:
+            # We isolate info fetching to prevent a crash if rate limited
+            info = ticker.info
+            current_price = hist['Close'].iloc[-1]
+            target_price = info.get('targetMeanPrice')
+            pe_ratio = info.get('trailingPE')
+            
+            # Use logic if data exists
+            if target_price and target_price > (current_price * 1.15): score += 2
+            if pe_ratio and pe_ratio < 15: score += 1
+        except Exception:
+            # Skip fundamentals silently if Yahoo blocks the request
+            pass
 
-    if score >= 3: return "STRONG BUY", "#00ff00"
-    elif score >= 1: return "BUY", "#7cfc00"
-    elif score <= -3: return "STRONG SELL", "#ff0000"
-    elif score <= -1: return "SELL", "#ff4500"
-    else: return "HOLD", "#ffd700"
+        # Apply Technical Score regardless of fundamental success
+        if rsi < 35: score += 2  # Oversold
+        elif rsi > 65: score -= 2 # Overbought
+
+        if score >= 3: return "STRONG BUY", "#00ff00"
+        elif score >= 1: return "BUY", "#7cfc00"
+        elif score <= -3: return "STRONG SELL", "#ff0000"
+        elif score <= -1: return "SELL", "#ff4500"
+        else: return "HOLD", "#ffd700"
+
+    except Exception:
+        # Fallback if the entire Ticker object or History fails
+        return "LIMIT REACHED", "#808080"
 
 # --- 4. UI ---
 st.markdown("<h1 class='main-title'>INDIAN STOCK'S TREND PREDICTION</h1>", unsafe_allow_html=True)
