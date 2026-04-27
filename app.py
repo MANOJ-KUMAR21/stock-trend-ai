@@ -4,7 +4,7 @@ import pandas as pd
 from streamlit_searchbox import st_searchbox
 
 # --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Indian Stock AI", layout="centered")
+st.set_page_config(page_title="Accurately Predict Stock Trends", layout="centered")
 
 # --- 2. CSS (Corrected for Raw GitHub Link) ---
 # Use the 'raw' link so Streamlit can actually see the image file
@@ -72,7 +72,7 @@ def get_data(symbol):
 
 # --- 4. UI ---
 st.markdown('<h1 class="main-title">INDIAN STOCK AI</h1>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #ffd700;'>NSE & BSE Trend Predictor</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ffd700;'>Stock's Trend Predictor</p>", unsafe_allow_html=True)
 
 selected_symbol = st_searchbox(
     get_suggestions,
