@@ -14,7 +14,7 @@ st.markdown(f"""
     <style>
     .stApp {{
         background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                    url("{https://github.com/MANOJ-KUMAR21/stock-trend-ai/blob/main/my_photo.jpg}");
+                    url("{IMAGE_URL}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
