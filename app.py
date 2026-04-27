@@ -6,26 +6,65 @@ from streamlit_searchbox import st_searchbox
 # --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Indian Stock AI", layout="centered")
 
-# --- 2. CSS ---
-st.markdown("""
+# --- 2. CSS (Modified to add your photo background) ---
+# Replace YOUR_IMAGE_DIRECT_LINK_HERE with your link, ensuring it stays inside the double quotes.
+# Example: url("https://i.imgur.com/yourPhoto.jpg")
+st.markdown(f"""
     <style>
-    .stApp {
-        background-color: #1e1e1e;
+    .stApp {{
+        background-image: url("YOUR_IMAGE_DIRECT_LINK_HERE");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
         color: white;
-    }
-    .main-title {
-        font-size: 45px;
+    }}
+    
+    /* Center and Style Headers */
+    .main-title {{
+        font-size: 50px !important;
         font-weight: 800;
         text-align: center;
         color: #00d4ff;
-    }
-    /* Fix for searchbox text color */
-    div[data-baseweb="select"] {
+        text-shadow: 0px 0px 15px rgba(0, 212, 255, 0.6);
+    }}
+    
+    .sub-title {{
+        font-size: 20px;
+        text-align: center;
+        color: #ffd700; 
+        font-weight: bold;
+    }}
+
+    /* Essential fixes for text visibility against a photo background */
+    
+    /* 1. Make all standard text white */
+    .stApp p, .stApp label, .stApp div {{
+        color: white !important;
+    }}
+    
+    /* 2. Fix the searchbox dropdown text color (must be black/dark) */
+    div[data-baseweb="select"] ul {{
+        background-color: white !important;
+    }}
+    div[data-baseweb="select"] li {{
         color: black !important;
-    }
+    }}
+    
+    /* 3. Style standard input boxes */
+    div[data-baseweb="input"] input {{
+        color: black !important;
+        background-color: rgba(255, 255, 255, 0.9) !important;
+    }}
+
+    /* 4. Style Metrics and boxes with a semi-transparent dark overlay */
+    [data-testid="stMetric"], .stAlert {{
+        background-color: rgba(0, 0, 0, 0.7) !important;
+        padding: 20px;
+        border-radius: 15px;
+        border: 1px solid rgba(0, 212, 255, 0.3);
+    }}
     </style>
     """, unsafe_allow_html=True)
-
 # --- 3. FUNCTIONS ---
 @st.cache_data(ttl="1d")
 def get_suggestions(search_term: str):
