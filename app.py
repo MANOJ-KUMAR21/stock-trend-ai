@@ -4,106 +4,77 @@ import pandas as pd
 from streamlit_searchbox import st_searchbox
 
 # --- 1. PAGE CONFIG ---
-st.set_page_config(page_title="Stock Trend AI - India", layout="centered")
+st.set_page_config(page_title="Indian Stock AI", layout="centered")
 
-# --- 2. ADVANCED CSS (Dark Fintech Theme) ---
+# --- 2. CSS ---
 st.markdown("""
     <style>
     .stApp {
-        background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), 
-                    url("https://images.unsplash.com/photo-1611974714851-eb60516122d6?q=80&w=2070");
-        background-size: cover;
+        background-color: #1e1e1e;
         color: white;
     }
     .main-title {
-        font-size: 45px !important;
+        font-size: 45px;
         font-weight: 800;
         text-align: center;
         color: #00d4ff;
-        text-shadow: 0px 0px 10px rgba(0, 212, 255, 0.5);
     }
-    .sub-title {
-        font-size: 18px;
-        text-align: center;
-        color: #ffd700;
-        margin-top: -10px;
-        font-weight: bold;
-    }
-    /* Style the Searchbox to be visible in dark mode */
-    div[data-baseweb="select"] > div {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid #00d4ff !important;
+    /* Fix for searchbox text color */
+    div[data-baseweb="select"] {
+        color: black !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. CACHED FUNCTIONS (Filtered for India) ---
-
+# --- 3. FUNCTIONS ---
 @st.cache_data(ttl="1d")
-def get_stock_suggestions(search_term: str):
+def get_suggestions(search_term: str):
     if not search_term or len(search_term) < 2:
         return []
     try:
-        # We fetch more results to ensure we find enough Indian matches
-        search = yf.Search(search_term, max_results=20)
-        
-        suggestions = []
-        for q in search.quotes:
-            symbol = q.get('symbol', '')
-            # FILTER: Only keep symbols ending in .NS or .BO
-            if symbol.endswith('.NS') or symbol.endswith('.BO'):
-                name = q.get('shortname', symbol)
-                suggestions.append((f"{name} ({symbol})", symbol))
-        
-        return suggestions
-    except Exception:
+        # Standard search
+        s = yf.Search(search_term, max_results=10)
+        # Filter for Indian stocks
+        return [(f"{q['shortname']} ({q['symbol']})", q['symbol']) 
+                for q in s.quotes if q.get('symbol', '').endswith(('.NS', '.BO'))]
+    except:
         return []
 
 @st.cache_data(ttl="300s")
-def get_stock_data(symbol):
+def get_data(symbol):
     return yf.download(symbol, period="6mo", interval="1d", progress=False)
 
-# --- 4. UI SECTION ---
+# --- 4. UI ---
 st.markdown('<h1 class="main-title">INDIAN STOCK AI</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-title">NSE & BSE Trend Predictor</p>', unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ffd700;'>NSE & BSE Trend Predictor</p>", unsafe_allow_html=True)
 
-col_a, col_b, col_c = st.columns([1, 6, 1])
-with col_b:
-    selected_symbol = st_searchbox(
-        get_stock_suggestions,
-        key="stock_search",
-        placeholder="Search (e.g. SBI, Tata, Reliance...)",
-    )
+selected_symbol = st_searchbox(
+    get_suggestions,
+    key="stock_search",
+    placeholder="Type company name (e.g. Titan, Tata...)",
+)
 
-# --- 5. RESULT LOGIC ---
-if selected_symbol:
-    with st.spinner('Fetching Indian Market Data...'):
-        try:
-            data = get_stock_data(selected_symbol)
-            
-            if not data.empty:
-                # Cleaning data for multi-index issues
-                close_prices = data['Close'].squeeze()
-                sma_20 = close_prices.rolling(window=20).mean()
-                current_price = float(close_prices.iloc[-1])
-                latest_sma = float(sma_20.iloc[-1])
+# Bring back the button for better control
+check_btn = st.button("Check Trend Now", use_container_width=True)
 
-                st.divider()
-                st.metric(label=f"Current Value ({selected_symbol})", value=f"₹{current_price:,.2f}")
+# --- 5. LOGIC ---
+if check_btn and selected_symbol:
+    with st.spinner('Analyzing...'):
+        data = get_data(selected_symbol)
+        if not data.empty:
+            close_prices = data['Close'].squeeze()
+            sma_20 = close_prices.rolling(window=20).mean()
+            current_price = float(close_prices.iloc[-1])
+            latest_sma = float(sma_20.iloc[-1])
 
-                if current_price > latest_sma:
-                    st.success(f"🚀 BULLISH: {selected_symbol} is trading above the 20-day trend line.")
-                else:
-                    st.warning(f"📉 BEARISH: {selected_symbol} is currently showing downward pressure.")
+            st.divider()
+            st.metric(label=f"Price: {selected_symbol}", value=f"₹{current_price:,.2f}")
 
-                # Professional Dark Chart
-                chart_df = pd.DataFrame({
-                    'Market Price': close_prices, 
-                    'AI Trend Line': sma_20
-                })
-                st.line_chart(chart_df)
-                
+            if current_price > latest_sma:
+                st.success(f"🚀 BULLISH: {selected_symbol} is in a growth phase.")
             else:
-                st.error("Market data currently unavailable for this symbol.")
-        except Exception as e:
-            st.error(f"Error: {e}")
+                st.warning(f"📉 BEARISH: {selected_symbol} is showing weakness.")
+            
+            st.line_chart(pd.DataFrame({'Price': close_prices, 'Trend': sma_20}))
+        else:
+            st.error("No data found. Please try another stock.")
