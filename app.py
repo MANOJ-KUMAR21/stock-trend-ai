@@ -6,21 +6,21 @@ from streamlit_searchbox import st_searchbox
 # --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Indian Stock AI", layout="centered")
 
-# --- 2. CSS (Using GitHub Raw Link) ---
-# PASTE YOUR RAW LINK BELOW
-IMAGE_URL = "https://github.com/MANOJ-KUMAR21/stock-trend-ai/blob/main/my_photo.jpg"
+# --- 2. CSS (Corrected for Raw GitHub Link) ---
+# Use the 'raw' link so Streamlit can actually see the image file
+IMAGE_URL = "https://raw.githubusercontent.com/MANOJ-KUMAR21/stock-trend-ai/main/my_photo.jpg"
 
 st.markdown(f"""
     <style>
     .stApp {{
         background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                    url("IMAGE_URL");
+                    url("{IMAGE_URL}");
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
     }}
     
-    /* Center and Style Headers */
+    /* Title and Header Styles */
     .main-title {{
         font-size: 50px !important;
         font-weight: 800;
@@ -29,12 +29,12 @@ st.markdown(f"""
         text-shadow: 0px 0px 15px rgba(0, 212, 255, 0.6);
     }}
     
-    /* Styling for visibility on top of photo */
+    /* Visibility on top of photo */
     .stApp p, .stApp label, .stApp div {{
         color: white !important;
     }}
 
-    /* Keeps the searchbox dropdown readable (black text on white background) */
+    /* Dropdown readability fix */
     div[data-baseweb="select"] ul {{
         background-color: white !important;
     }}
@@ -42,7 +42,7 @@ st.markdown(f"""
         color: black !important;
     }}
     
-    /* Metric boxes with glassmorphism effect */
+    /* Glassmorphism for Metrics */
     [data-testid="stMetric"] {{
         background-color: rgba(255, 255, 255, 0.1) !important;
         backdrop-filter: blur(10px);
@@ -51,8 +51,7 @@ st.markdown(f"""
         border: 1px solid rgba(255, 255, 255, 0.2);
     }}
     </style>
-    """, unsafe_allow_html=True)
-    
+    """, unsafe_allow_html=True)    
     # --- 3. FUNCTIONS ---
 @st.cache_data(ttl="1d")
 def get_suggestions(search_term: str):
