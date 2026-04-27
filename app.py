@@ -60,7 +60,7 @@ def get_suggestions(search_term: str):
     try:
         # Standard search
         s = yf.Search(search_term, max_results=10)
-        # Filter for Indian stocks
+        # Filter for  stocks
         return [(f"{q['shortname']} ({q['symbol']})", q['symbol']) 
                 for q in s.quotes if q.get('symbol', '').endswith(('.NS', '.BO'))]
     except:
@@ -71,7 +71,7 @@ def get_data(symbol):
     return yf.download(symbol, period="6mo", interval="1d", progress=False)
 
 # --- 4. UI ---
-st.markdown('<h1 class="main-title">INDIAN STOCK'S TREND PREDICTION</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">INDIAN STOCKS TREND PREDICTION</h1>', unsafe_allow_html=True)
 st.markdown("<p style='text-align: center; color: #ffd700;'>Stock's Trend Predictor</p>", unsafe_allow_html=True)
 
 selected_symbol = st_searchbox(
