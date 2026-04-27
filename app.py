@@ -3,19 +3,18 @@ import yfinance as yf
 import pandas as pd
 from streamlit_searchbox import st_searchbox
 
+# --- 1. PAGE CONFIG ---
 st.set_page_config(page_title="Stock Trend AI", layout="centered")
 
-# --- 1. THE SEARCH FUNCTION ---
-def search_stocks(search_term: str):
-    """This function runs every time the user types a letter"""
+# --- 2. CACHED FUNCTIONS (Defined outside any blocks) ---
+
+@st.cache_data(ttl="1d")
+def get_stock_suggestions(search_term: str):
+    """Fetches suggestions and caches them for 1 day"""
     if not search_term or len(search_term) < 2:
         return []
-    
     try:
-        # Use yfinance search to get suggestions
         search = yf.Search(search_term, max_results=8)
-        # Filter for NSE/BSE stocks and format for the dropdown
-        # Returns a list of tuples: (Label to show user, Value to use in code)
         suggestions = [
             (f"{q['shortname']} ({q['symbol']})", q['symbol']) 
             for q in search.quotes 
@@ -25,7 +24,12 @@ def search_stocks(search_term: str):
     except Exception:
         return []
 
-# --- 2. HEADER SECTION ---
+@st.cache_data(ttl="300s")
+def get_stock_data(symbol):
+    """Fetches stock price and caches for 5 minutes"""
+    return yf.download(symbol, period="6mo", interval="1d", progress=False)
+
+# --- 3. HEADER & UI SECTION ---
 st.markdown("---")
 col_a, col_b, col_c = st.columns([1, 4, 1])
 
@@ -33,24 +37,26 @@ with col_b:
     st.title("Stock AI Analysis")
     st.subheader("AI analysis trend (free)")
     
-    # THE SEARCH BAR (Replaces st.text_input)
+    # Use the CACHED search function here
     selected_symbol = st_searchbox(
-        search_stocks,
+        get_stock_suggestions,
         key="stock_search",
         placeholder="Type company name (e.g., Tata, Reliance...)",
         label="Search Stock Name or Symbol"
     )
 
-# --- 3. RESULT LOGIC ---
-# It triggers automatically when a symbol is selected from the dropdown
+# --- 4. RESULT LOGIC ---
 if selected_symbol:
     with st.spinner(f'Analyzing {selected_symbol}...'):
         try:
-            data = yf.download(selected_symbol, period="6mo", interval="1d", progress=False)
+            # Use the CACHED data function here
+            data = get_stock_data(selected_symbol)
             
             if not data.empty:
+                # Handle potential multi-index columns from yfinance
                 close_prices = data['Close'].squeeze()
                 sma_20 = close_prices.rolling(window=20).mean()
+                
                 current_price = float(close_prices.iloc[-1])
                 latest_sma = float(sma_20.iloc[-1])
 
@@ -63,7 +69,13 @@ if selected_symbol:
                     st.warning(f"📉 BEARISH TREND: {selected_symbol} is showing weakness.")
 
                 st.write("### 6-Month Performance vs AI Trend Line")
-                chart_data = pd.DataFrame({'Price': close_prices, 'AI Trend (20D)': sma_20})
+                chart_data = pd.DataFrame({
+                    'Price': close_prices, 
+                    'AI Trend (20D)': sma_20
+                })
                 st.line_chart(chart_data)
+            else:
+                st.error(f"No data found for {selected_symbol}")
+                
         except Exception as e:
             st.error(f"Error fetching data: {e}")
