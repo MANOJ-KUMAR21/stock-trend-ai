@@ -108,8 +108,8 @@ def get_ai_recommendation(symbol):
     except: return "LIMIT REACHED", "#808080"
 
 # --- 4. UI ---
-st.markdown("<h1 class='main-title'>QUANT HILL STOCK'S TREND PREDICTION</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #ffd700; font-weight: bold;'>AI Technical & Fundamental Analysis</p>", unsafe_allow_html=True)
+st.markdown("<h1 class='main-title'>QUANT HILL TREND PREDICTION</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #ffd700; font-weight: bold;'>Technical & Fundamental Analysis</p>", unsafe_allow_html=True)
 
 selected_symbol = st_searchbox(get_suggestions, key="stock_search", placeholder="Enter stock (e.g. Reliance, TCS...)")
 check_btn = st.button("Check Trend Now", use_container_width=True)
