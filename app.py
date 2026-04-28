@@ -7,10 +7,22 @@ from streamlit_searchbox import st_searchbox
 st.set_page_config(page_title="Quant Hill Stock Trend Analysis", layout="centered")
 
 # --- 2. CSS (Background, Premium Button & Text Visibility) ---
+# --- 2. CSS (Modified to hide GitHub and Streamlit branding) ---
 IMAGE_URL = "https://raw.githubusercontent.com/MANOJ-KUMAR21/stock-trend-ai/main/my_photo.jpg"
 
 st.markdown(f"""
     <style>
+    /* Hide GitHub Logo and Streamlit Footer */
+    header {{visibility: hidden;}}
+    footer {{visibility: hidden;}}
+    #MainMenu {{visibility: hidden;}}
+    .stDeployButton {{display:none;}}
+    
+    /* Target the specific GitHub link in the top right */
+    [data-testid="stStatusWidget"] {{
+        display: none !important;
+    }}
+
     .stApp {{
         background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
                     url("{IMAGE_URL}");
@@ -27,12 +39,9 @@ st.markdown(f"""
     }}
     .stApp p, .stApp label, .stApp div {{ color: white !important; }}
     
-    /* Searchbox Fix: Ensure dropdown text is black and input text is visible */
     div[data-baseweb="select"] ul {{ background-color: white !important; }}
     div[data-baseweb="select"] li {{ color: black !important; }}
-    input[data-testid="stWidgetLabel"] {{ color: white !important; }}
     
-    /* PREMIUM BUTTON STYLE */
     div.stButton > button {{
         background: linear-gradient(45deg, #00d4ff, #0056b3) !important;
         color: white !important;
@@ -40,26 +49,13 @@ st.markdown(f"""
         border-radius: 10px !important;
         border: none !important;
         height: 3em !important;
-        transition: 0.3s !important;
         box-shadow: 0px 0px 15px rgba(0, 212, 255, 0.4) !important;
         text-transform: uppercase;
     }}
-    div.stButton > button:hover {{
-        box-shadow: 0px 0px 25px rgba(0, 212, 255, 0.8) !important;
-        transform: scale(1.02) !important;
-    }}
-
-    [data-testid="stMetric"] {{
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(10px);
-        padding: 20px;
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }}
     </style>
     """, unsafe_allow_html=True)
-
-# --- 3. CACHED FUNCTIONS ---
+    
+    # --- 3. CACHED FUNCTIONS ---
 
 @st.cache_data(ttl="1d")
 def get_suggestions(search_term: str):
